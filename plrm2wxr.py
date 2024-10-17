@@ -55,12 +55,46 @@ def procesar_url(url):
     texto_formateado = re.sub(r'^#(\d)', r'\1', texto_formateado, flags=re.MULTILINE)
 
     return texto_formateado
+    
+def encontrar_primera_serie(contenido_procesado):
+  """Encuentra el índice de la primera línea que inicia con un número.
 
-def guardar_en_archivo(contenido, nombre_archivo):
-    with open(nombre_archivo, 'w') as archivo:
-        archivo.writelines(contenido)
-    print(f"Archivo guardado como {nombre_archivo}")
+  Args:
+    contenido_procesado: El contenido procesado del sitio web, en formato de lista de líneas.
 
+  Returns:
+    El índice de la primera línea que inicia con un número, o None si no se encuentra.
+  """
+
+  for i, linea in enumerate(contenido_procesado):
+    if linea and linea[0].isdigit():
+      return i + 1  # Sumamos 1 para obtener el índice en base 1
+  return None
+
+def eliminar_hashes_hasta_linea(contenido_procesado, primer_serie):
+  """Elimina los símbolos # al inicio de las líneas hasta la línea primer_serie-2.
+
+  Args:
+    contenido_procesado: El contenido procesado del sitio web, en formato de lista de líneas.
+    primer_serie: El índice de la primera línea que inicia con un número.
+
+  Returns:
+    Una nueva lista de líneas con los hashes eliminados hasta la línea indicada.
+  """
+
+  resultado = []
+  for i, linea in enumerate(contenido_procesado):
+    if i < primer_serie - 2 and linea.startswith('#'):
+      linea = linea[1:]  # Elimina el primer carácter (el '#')
+    resultado.append(linea)
+  return resultado
+
+
+def guardar_en_archivo(nuevo_contenido, nombre_archivo):
+    with open(nombre_archivo, 'w', encoding='utf-8') as archivo:
+        for linea in nuevo_contenido:
+            archivo.write(linea + '\n')
+    
 if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("Uso: python plrm2wxr.py URL")
@@ -69,8 +103,19 @@ if __name__ == "__main__":
     url = re.sub(r"'\]", '', re.sub(r"\['", '', str(sys.argv[1:])))
     contenido_procesado = procesar_url(url)
     
+    # Convertimos el contenido en una lista de líneas (si aún no lo está)
+    lineas = contenido_procesado.splitlines()
+    
+    # Encontramos la primera línea que inicia con un número
+    # Esta línea sería la primera serie de ejercicios
+    primer_serie = encontrar_primera_serie(lineas)
+    
+    # Eliminamos los hashes hasta la línea indicada, es decir, 2 líneas antes que el primer set de ejercicios, para limpiar el texto libre que no es parte del entrenamiento
+    nuevo_contenido = eliminar_hashes_hasta_linea(lineas, primer_serie)
+    
     # Imprimir el contenido procesado en consola
-    print(contenido_procesado)
+    for linea in nuevo_contenido:
+        print(linea)
     
     # Guardar el contenido en un archivo de texto
-    guardar_en_archivo(contenido_procesado, 'plrm2wxr.txt')
+    guardar_en_archivo(nuevo_contenido, 'plrm2wxr.txt')
