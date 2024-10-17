@@ -7,10 +7,17 @@ import textwrap
 
 # Función para convertir el tiempo "min:seg" en segundos
 def convertir_a_segundos(tiempo):
+    """
+    Args:
+    el tiempo de un ejercicio en formato MM:SS
+
+    Returns:
+    Retorna en una cifra en segundos
+    """
     minutos, segundos = map(int, tiempo.split(":"))
     return minutos * 60 + segundos
 
-# Función para reemplazar tiempos "min:seg" por segundos
+# Función para reemplazar ejercicios basados en tiempo a segundos
 def reemplazar_tiempo(match):
     peso = match.group(1)
     tiempo = match.group(2)
@@ -18,6 +25,13 @@ def reemplazar_tiempo(match):
     return f"{peso} x {segundos} sec"
 
 def procesar_url(url):
+    """
+    Args:
+    recibe una URL de un post de pleroma
+
+    Returns:
+    Retorna el contenido del post en texto, además en un formato que entienda WeightXReps
+    """
     print(f'Procesando URL: {url}')
 
     # Convertir la URL a formato de API
@@ -91,6 +105,13 @@ def eliminar_hashes_hasta_linea(contenido_procesado, primer_serie):
 
 
 def guardar_en_archivo(nuevo_contenido, nombre_archivo):
+    """
+    Args:
+    el texto procesado y el nombre del archivo donde se almacenará el texto
+
+    Returns:
+    Nada (escribe en un archivo)
+    """
     with open(nombre_archivo, 'w', encoding='utf-8') as archivo:
         for linea in nuevo_contenido:
             archivo.write(linea + '\n')
